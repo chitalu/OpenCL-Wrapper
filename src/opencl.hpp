@@ -142,9 +142,12 @@ struct Device_Info {
 		int dp4a_error = 0;
 		is_dp4a_capable = is_dp4a_capable&&(uint)(cl_device.getInfo<CL_DEVICE_INTEGER_DOT_PRODUCT_CAPABILITIES_KHR>(&dp4a_error)==3);
 		is_dp4a_capable = is_dp4a_capable&&dp4a_error==0;
-		const auto idpap = cl_device.getInfo<CL_DEVICE_INTEGER_DOT_PRODUCT_ACCELERATION_PROPERTIES_4x8BIT_PACKED_KHR>(&dp4a_error);
-		const cl_bool* idpap_bits = (cl_bool*)&idpap; // on some unsupported devices, values are random, so only claim is_dp4a_capable if all bits are set correctly
-		is_dp4a_capable = is_dp4a_capable&&dp4a_error==0&&idpap_bits[0]==1&&idpap_bits[1]==1&&idpap_bits[2]==1&&idpap_bits[3]==1&&idpap_bits[4]==1&&idpap_bits[5]==1;
+		if (name != "Oclgrind Simulator")
+		{
+			const auto idpap = cl_device.getInfo<CL_DEVICE_INTEGER_DOT_PRODUCT_ACCELERATION_PROPERTIES_4x8BIT_PACKED_KHR>(&dp4a_error);
+			const cl_bool* idpap_bits = (cl_bool*)&idpap; // on some unsupported devices, values are random, so only claim is_dp4a_capable if all bits are set correctly
+			is_dp4a_capable = is_dp4a_capable&&dp4a_error==0&&idpap_bits[0]==1&&idpap_bits[1]==1&&idpap_bits[2]==1&&idpap_bits[3]==1&&idpap_bits[4]==1&&idpap_bits[5]==1;
+		}
 		if(vendor_id==0x1002) { // AMD GPU/CPU
 			const bool amd_dual_cu = is_gpu&&contains_any(to_lower(name), {"gfx10", "gfx11", "gfx12"}); // identify RDNA/RDNA2/RDNA3/RDNA4 GPUs where dual CUs are reported
 			const bool amd_dual_issuing = is_gpu&&contains_any(to_lower(name), {"gfx11", "gfx12"}); // identify RDNA3/RDNA4 GPUs where cores can dual-issue float2
