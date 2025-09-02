@@ -142,7 +142,16 @@ struct Device_Info {
 		int dp4a_error = 0;
 		is_dp4a_capable = is_dp4a_capable&&(uint)(cl_device.getInfo<CL_DEVICE_INTEGER_DOT_PRODUCT_CAPABILITIES_KHR>(&dp4a_error)==3);
 		is_dp4a_capable = is_dp4a_capable&&dp4a_error==0;
-		if (name != "Oclgrind Simulator")
+		auto find_substring_case_insenstive=[](const std::string & str, const std::string & substr)
+		{
+			auto it = std::search(
+				str.begin(), str.end(),
+				substr.begin(), substr.end(),
+				[](unsigned char ch1, unsigned char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
+			);
+			return (it != str.end());
+		};
+		if (!(name == "Oclgrind Simulator" || find_substring_case_insenstive(name, "nvidia")))
 		{
 			const auto idpap = cl_device.getInfo<CL_DEVICE_INTEGER_DOT_PRODUCT_ACCELERATION_PROPERTIES_4x8BIT_PACKED_KHR>(&dp4a_error);
 			const cl_bool* idpap_bits = (cl_bool*)&idpap; // on some unsupported devices, values are random, so only claim is_dp4a_capable if all bits are set correctly
